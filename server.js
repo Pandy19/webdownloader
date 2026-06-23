@@ -323,8 +323,11 @@ function startJobDownload(job, useCookies = true) {
     }
   });
 
+  let stderrData = '';
   ytdlp.stderr.on('data', (data) => {
-    // Warnings are printed here, errors will trigger close non-zero exit codes.
+    const chunk = data.toString();
+    stderrData += chunk;
+    console.error(`[yt-dlp stderr ${jobId}]: ${chunk}`);
   });
 
   ytdlp.on('close', (code) => {
@@ -360,7 +363,18 @@ function startJobDownload(job, useCookies = true) {
           return;
         }
         job.status = 'failed';
-        job.error = `Download process exited with error code ${code}.`;
+        
+        // Extract a clean error summary from stderr
+        let cleanErr = stderrData.trim().split('\n')
+          .map(line => line.trim())
+          .filter(line => line.startsWith('ERROR:') || line.toLowerCase().includes('failed') || line.toLowerCase().includes('unable') || line.toLowerCase().includes('error'))
+          .join('\n');
+          
+        if (!cleanErr) {
+          cleanErr = stderrData.trim().split('\n').slice(-2).join('\n'); // fallback to last 2 lines
+        }
+        
+        job.error = cleanErr || `Download process exited with error code ${code}.`;
       }
     }
 
