@@ -401,6 +401,7 @@ app.post('/api/download', rateLimiter, (req, res) => {
 
   const job = {
     id: jobId,
+    url: url,
     title: title || 'YouTube Video',
     safeTitle: safeFilenameTitle,
     type: type,
