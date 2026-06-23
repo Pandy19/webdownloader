@@ -138,7 +138,8 @@ app.get('/api/info', rateLimiter, (req, res) => {
     const args = [
       '--dump-json',
       '--skip-download',
-      '--no-playlist'
+      '--no-playlist',
+      '--js-runtimes', 'node'
     ];
 
     if (useCookies && hasCookies) {
@@ -277,7 +278,8 @@ function startJobDownload(job, useCookies = true) {
       '--audio-format', 'mp3',
       '--audio-quality', bitrate,
       '--newline',
-      '--no-playlist'
+      '--no-playlist',
+      '--js-runtimes', 'node'
     ];
   } else {
     const resLimit = quality || '1080';
@@ -285,7 +287,8 @@ function startJobDownload(job, useCookies = true) {
       '-f', `bestvideo[height<=${resLimit}]+bestaudio/best[height<=${resLimit}]`,
       '--merge-output-format', 'mp4',
       '--newline',
-      '--no-playlist'
+      '--no-playlist',
+      '--js-runtimes', 'node'
     ];
   }
 
