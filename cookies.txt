@@ -9,10 +9,9 @@
 .youtube.com	TRUE	/	TRUE	1813736641	__Secure-3PSIDTS	sidts-CjUByojQUxyspgxqFzjmB0tK-BsRVEA6uyAjxK9B33pIc7KxMSVRD_BjS1tdsa-2bC7-FWb_lBAA
 .youtube.com	TRUE	/	TRUE	1813737801	__Secure-3PSIDCC	AKEyXzUhMmllCK0iKt36xcdf7po4eTR-8rhvwtIb3xv8l_8nVsUNbVfRCWK__9k8KzgoD6wnFk0
 .youtube.com	TRUE	/	TRUE	1797753362	__Secure-YNID	19.YT=Z7SzfEYiNXBelqGVitrMsrS5X_NXZBuXL-ioYsPbKrE2iuJfTXCPHJfPXXA_B3j-b6PGg6Jdk3FVzGICbRijCDXGLihxyC0etlqyJVtCU8idHFJJoM3P2ZB4v3AzRNDSn2BFTzMFDT-PHMza7UACvCPTta7f4PqL7IQIXmjLOUBdbzVP6PPO2arc7-IJz-XDJVyiSFoSGusqA2DPeYUUarR9A0OjuOuRnkMeHXm3G5YtGuDQWNJzku8qdRo2IqdgkCWpNHMO0wWt76xoaMzsxkRx7sj5ph2_DMs8krMqdRpYtFyTtYspR8lx3s0dchwNyOVgHmrAdSSjbgCdS0FTGw
-.youtube.com	TRUE	/	TRUE	1797754006	VISITOR_INFO1_LIVE	qrib5nl1jtU
-.youtube.com	TRUE	/	TRUE	1797754006	VISITOR_PRIVACY_METADATA	CgJLSBIEGgAgaw%3D%3D
+.youtube.com	TRUE	/	TRUE	1797756402	VISITOR_INFO1_LIVE	qrib5nl1jtU
+.youtube.com	TRUE	/	TRUE	1797756402	VISITOR_PRIVACY_METADATA	CgJLSBIEGgAgaw%3D%3D
 .youtube.com	TRUE	/	TRUE	1797753384	__Secure-ROLLOUT_TOKEN	CNrws9jRyO-KYhCezvq48ZyVAxiZlLTD8ZyVAw%3D%3D
-.youtube.com	TRUE	/	TRUE	1782203793	GPS	1
 .youtube.com	TRUE	/	TRUE	0	SOCS	CAI
-.youtube.com	TRUE	/	TRUE	0	YSC	6vOV0O4qTQY
+.youtube.com	TRUE	/	TRUE	1782206189	GPS	1
 www.youtube.com	FALSE	/	FALSE	1782230303	funnelData	{"loupe":{"percent":99,"isPanelShown":false},"cursor":{"percent":45,"isPanelShown":false},"blurb":{"percent":97,"isPanelShown":false},"darkmood":{"percent":73,"isPanelShown":false}}
