@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YT-Download - High-Quality YouTube MP4 & MP3 Downloader</title>
+    <meta
+      name="description"
+      content="Convert and download YouTube videos in high-quality MP4 and MP3 formats for free. Fast, clean, and no registration required."
+    />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- FontAwesome for Premium Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Background glow elements for rich aesthetics -->
+    <div class="glow-bg-1"></div>
+    <div class="glow-bg-2"></div>
+
+    <div class="container">
+      <!-- Header -->
+      <header>
+        <div class="logo">
+          <i class="fa-solid fa-bolt logo-icon"></i>
+          <span class="logo-text"
+            >YT-<span class="gradient-text">Download</span></span
+          >
+        </div>
+        <div class="header-right">
+          <a href="#" class="btn-support" id="support-btn">
+            <i class="fa-solid fa-heart"></i> <span>Support Us</span>
+          </a>
+          <div class="header-tag">Fast & Free</div>
+        </div>
+      </header>
+
+      <!-- Main Card -->
+      <main class="main-card">
+        <h1 class="main-title">YouTube MP4 & MP3 Downloader</h1>
+        <p class="main-subtitle">
+          Download video and audio streams in pristine resolution or extract
+          high-fidelity audio tracks in one click.
+        </p>
+
+        <!-- Search / Input Form -->
+        <div class="search-container" id="search-form">
+          <div class="input-wrapper">
+            <i class="fa-brands fa-youtube input-yt-icon"></i>
+            <input
+              type="text"
+              id="url-input"
+              placeholder="Paste YouTube video link here..."
+              autocomplete="off"
+            />
+            <button
+              type="button"
+              id="paste-btn"
+              class="icon-btn-secondary"
+              title="Paste link from clipboard"
+            >
+              <i class="fa-regular fa-clipboard"></i>
+            </button>
+          </div>
+          <button type="button" id="fetch-btn" class="btn-primary">
+            <span id="fetch-btn-text">Extract Details</span>
+            <i
+              class="fa-solid fa-arrow-right icon-right"
+              id="fetch-btn-icon"
+            ></i>
+            <div class="spinner hidden" id="fetch-spinner"></div>
+          </button>
+        </div>
+
+        <!-- Ad Placement: Main Form Banner -->
+        <div class="ad-slot banner-main">
+          <span class="ad-badge">Advertisement</span>
+          <div class="ad-placeholder-content">
+            <i class="fa-solid fa-rectangle-ad"></i>
+            <p>Your Banner Ad Code Here</p>
+          </div>
+        </div>
+
+        <!-- Error Banner -->
+        <div class="error-banner hidden" id="error-message">
+          <i class="fa-solid fa-circle-exclamation error-icon"></i>
+          <span id="error-text"
+            >An error occurred while fetching the video.</span
+          >
+        </div>
+
+        <!-- Playlist Warning Banner -->
+        <div class="warning-banner hidden" id="playlist-warning">
+          <i class="fa-solid fa-circle-info warning-icon"></i>
+          <span
+            >Playlist detected. YT-Download will extract details for the first
+            video only.</span
+          >
+        </div>
+
+        <!-- Loader Skeleton while fetching details -->
+        <div class="skeleton-loader hidden" id="skeleton-loader">
+          <div class="skeleton-thumb"></div>
+          <div class="skeleton-details">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-channel"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+            <div class="skeleton-tabs">
+              <div class="skeleton-tab"></div>
+              <div class="skeleton-tab"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video Details Card (Initially Hidden) -->
+        <div class="video-card hidden" id="video-card">
+          <div class="video-info">
+            <div class="thumbnail-wrapper">
+              <img src="" alt="Video Thumbnail" id="video-thumbnail" />
+              <span class="video-duration" id="video-duration">0:00</span>
+            </div>
+            <div class="video-details">
+              <h2 class="video-title" id="video-title">YouTube Video Title</h2>
+              <div class="video-meta">
+                <span class="uploader-name" id="video-uploader">
+                  <i class="fa-solid fa-user-circle"></i>
+                  <span id="uploader-text">Channel Name</span>
+                  <i class="fa-solid fa-circle-check verified-badge"></i>
+                </span>
+                <span class="video-views" id="video-views">
+                  <i class="fa-solid fa-eye"></i>
+                  <span id="views-text">0 views</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabs (MP4 Video / MP3 Audio) -->
+          <div class="tabs-container">
+            <button
+              type="button"
+              class="tab-btn active"
+              id="tab-video"
+              data-tab="video"
+            >
+              <i class="fa-solid fa-video"></i> Video (MP4)
+            </button>
+            <button
+              type="button"
+              class="tab-btn"
+              id="tab-audio"
+              data-tab="audio"
+            >
+              <i class="fa-solid fa-music"></i> Audio (MP3)
+            </button>
+          </div>
+
+          <!-- Format Options Panel -->
+          <div class="panels-container">
+            <!-- Video formats panel -->
+            <div class="format-panel active" id="panel-video">
+              <div class="formats-grid" id="video-formats-grid">
+                <!-- Dynamically loaded formats -->
+              </div>
+            </div>
+
+            <!-- Audio formats panel -->
+            <div class="format-panel" id="panel-audio">
+              <div class="formats-grid" id="audio-formats-grid">
+                <!-- Pre-configured high quality audio bitrates -->
+                <div class="format-item">
+                  <div class="format-info-left">
+                    <span class="format-badge audio">MP3</span>
+                    <div class="format-details-text">
+                      <span class="format-quality"
+                        >320 kbps (High Fidelity)</span
+                      >
+                      <span class="format-size-est" id="audio-size-320"
+                        >Estimated size: ~8 MB (for 3 min)</span
+                      >
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    class="download-btn btn-secondary start-download-btn"
+                    data-type="audio"
+                    data-quality="320K"
+                  >
+                    <span>Download</span> <i class="fa-solid fa-download"></i>
+                  </button>
+                </div>
+                <div class="format-item">
+                  <div class="format-info-left">
+                    <span class="format-badge audio">MP3</span>
+                    <div class="format-details-text">
+                      <span class="format-quality"
+                        >256 kbps (High Quality)</span
+                      >
+                      <span class="format-size-est" id="audio-size-256"
+                        >Estimated size: ~6 MB (for 3 min)</span
+                      >
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    class="download-btn btn-secondary start-download-btn"
+                    data-type="audio"
+                    data-quality="256K"
+                  >
+                    <span>Download</span> <i class="fa-solid fa-download"></i>
+                  </button>
+                </div>
+                <div class="format-item">
+                  <div class="format-info-left">
+                    <span class="format-badge audio">MP3</span>
+                    <div class="format-details-text">
+                      <span class="format-quality">128 kbps (Standard)</span>
+                      <span class="format-size-est" id="audio-size-128"
+                        >Estimated size: ~3 MB (for 3 min)</span
+                      >
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    class="download-btn btn-secondary start-download-btn"
+                    data-type="audio"
+                    data-quality="128K"
+                  >
+                    <span>Download</span> <i class="fa-solid fa-download"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Ad Placement: Video Details Bottom -->
+          <div class="ad-slot banner-details">
+            <span class="ad-badge">Advertisement</span>
+            <div class="ad-placeholder-content">
+              <i class="fa-solid fa-rectangle-ad"></i>
+              <p>Your Banner Ad Code Here</p>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Features list -->
+      <section class="features-section">
+        <div class="feature-card">
+          <div class="feature-icon-wrapper cyan">
+            <i class="fa-solid fa-gauge-high"></i>
+          </div>
+          <h3>High-Speed Extraction</h3>
+          <p>
+            Advanced backend muxing using high performance servers for rapid
+            conversion.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrapper purple">
+            <i class="fa-solid fa-compact-disc"></i>
+          </div>
+          <h3>Pristine Quality</h3>
+          <p>
+            Supports full resolution output from 1080p up to ultra-sharp 4K UHD
+            and 320kbps audio.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon-wrapper pink">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <h3>Safe & Free</h3>
+          <p>
+            No account required. All files are scanned and delivered directly to
+            your device securely.
+          </p>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer>
+        <p>
+          &copy; 2026
+          <a href="https://t.me/pandyshare" target="_blank" class="footer-link"
+            >PandyShare</a
+          >. All rights reserved. |
+          <a href="#" class="footer-link" id="tos-link">Terms of Service</a> |
+          <a href="#" class="footer-link" id="dmca-link">DMCA</a>
+        </p>
+      </footer>
+    </div>
+
+    <!-- Download Progress Modal -->
+    <div class="modal-overlay hidden" id="progress-modal">
+      <div class="modal-card">
+        <!-- Loading/Queued State -->
+        <div id="modal-loading-state">
+          <div class="modal-header">
+            <h3 class="modal-headline" id="modal-title-text">
+              Processing Video...
+            </h3>
+            <button
+              type="button"
+              class="modal-close-btn"
+              id="modal-cancel-btn"
+              title="Cancel Download"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p class="modal-video-title" id="modal-video-title-display">
+              Video Title Example...
+            </p>
+
+            <div class="progress-container">
+              <div class="progress-bar-bg">
+                <div
+                  class="progress-bar-fill"
+                  id="progress-bar-fill"
+                  style="width: 0%"
+                ></div>
+              </div>
+              <div class="progress-stats">
+                <span class="progress-percentage" id="progress-percent-display"
+                  >0%</span
+                >
+                <span class="progress-speed" id="progress-speed-display"
+                  >0 B/s</span
+                >
+              </div>
+            </div>
+
+            <div class="detail-stats-grid">
+              <div class="stat-box">
+                <span class="stat-label">File Size</span>
+                <span class="stat-value" id="progress-size-display"
+                  >Calculating...</span
+                >
+              </div>
+              <div class="stat-box">
+                <span class="stat-label">Time Remaining</span>
+                <span class="stat-value" id="progress-eta-display"
+                  >Estimating...</span
+                >
+              </div>
+              <div class="stat-box">
+                <span class="stat-label">Task Phase</span>
+                <span class="stat-value text-glow" id="progress-phase-display"
+                  >Initializing yt-dlp...</span
+                >
+              </div>
+            </div>
+
+            <!-- Ad Placement: Modal Waiting Screen Banner -->
+            <div class="ad-slot banner-modal">
+              <span class="ad-badge">Advertisement</span>
+              <div class="ad-placeholder-content">
+                <i class="fa-solid fa-rectangle-ad"></i>
+                <p>Your Banner Ad Code Here</p>
+              </div>
+            </div>
+
+            <div class="modal-footer-actions">
+              <button
+                type="button"
+                id="modal-abort-btn"
+                class="btn-cancel-action"
+              >
+                <i class="fa-solid fa-ban"></i> Cancel Processing
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Success State -->
+        <div id="modal-success-state" class="hidden text-center">
+          <div class="success-icon-wrapper">
+            <i class="fa-solid fa-circle-check success-check-icon"></i>
+          </div>
+          <h3 class="modal-headline">Conversion Complete!</h3>
+          <p class="success-msg">
+            Your file is fully processed and ready for download.
+          </p>
+          <p class="modal-video-title" id="success-video-title-display">
+            Video Title Example...
+          </p>
+
+          <a
+            href="#"
+            id="save-file-btn"
+            class="btn-primary btn-block text-center"
+          >
+            <i class="fa-solid fa-file-arrow-down icon-left"></i> Save File to
+            Device
+          </a>
+
+          <a
+            href="#"
+            class="btn-secondary btn-block text-center mt-2"
+            id="modal-support-btn"
+            style="justify-content: center"
+          >
+            <i class="fa-solid fa-mug-hot" style="color: #f43f5e"></i> Buy Me a
+            Coffee ☕
+          </a>
+
+          <button type="button" id="success-done-btn" class="btn-text mt-3">
+            Close Window
+          </button>
+        </div>
+
+        <!-- Failed State -->
+        <div id="modal-failed-state" class="hidden text-center">
+          <div class="failed-icon-wrapper">
+            <i class="fa-solid fa-circle-xmark failed-x-icon"></i>
+          </div>
+          <h3 class="modal-headline">Download Failed</h3>
+          <p class="failed-msg" id="modal-error-msg">
+            Something went wrong during the conversion process.
+          </p>
+
+          <button
+            type="button"
+            id="failed-retry-btn"
+            class="btn-primary btn-block mt-3"
+          >
+            Try Again
+          </button>
+          <button type="button" id="failed-close-btn" class="btn-text mt-2">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legal Modals -->
+    <div class="modal-overlay hidden" id="legal-modal">
+      <div class="modal-card legal-card">
+        <div class="modal-header">
+          <h3 class="modal-headline" id="legal-title">Terms of Service</h3>
+          <button type="button" class="modal-close-btn" id="legal-close-btn">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-body legal-body" id="legal-content">
+          <!-- Content injected dynamically via Javascript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Support/Donation QR Modal -->
+    <div class="modal-overlay hidden" id="support-modal">
+      <div class="support-qr-container">
+        <button
+          type="button"
+          class="support-close-btn"
+          id="support-close-btn"
+          title="Close"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <img src="qr.png" alt="Donation QR Code" class="support-qr-img" />
+      </div>
+    </div>
+
+    <!-- JavaScript code -->
+    <script src="app.js"></script>
+  </body>
+</html>
