@@ -119,14 +119,13 @@ router.get('/info', (req, res) => {
             console.log(`[TikTok retry] code=${rc}, stdout=${rt.length}bytes`);
             if (!rt) {
               if (/cookie|browser|permission/i.test(rErr)) return res.status(500).json({ error: 'Firefox browser must be closed or cookies are inaccessible. Please close Firefox and try again.' });
-              return res.status(400).json({ error: 'TikTok blocked this request. Try again in a moment.' });
-            }
+              return res.status(400).json({ error: 'TikTok blocked this request. Try again in a moment. <b>Refresh Page</b>' });            }
             try { handleInfo(JSON.parse(rt), originalUrl, res); } catch { res.status(500).json({ error: 'Failed to parse.' }); }
           });
         }, 10000);
         return;
       }
-      return res.status(400).json({ error: 'TikTok blocked this request. Try again in a moment.' });
+      return res.status(400).json({ error: 'TikTok blocked this request. Try again in a moment. <b>Refresh Page</b>' });
     }
 
     try {

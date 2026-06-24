@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
     modalFailed.classList.toggle('hidden', state !== 'failed');
   }
 
-  function showErr(msg) { errorText.textContent = msg; errorBanner.classList.remove('hidden'); }
+  function showErr(msg) { errorText.innerHTML = msg; errorBanner.classList.remove('hidden'); }
   function hideErr() { errorBanner.classList.add('hidden'); }
 
   document.getElementById('modal-x').addEventListener('click', cancelJob);
