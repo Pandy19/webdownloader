@@ -40,6 +40,10 @@ setInterval(() => {
 }, 60000);
 const cookiesPath = path.join(__dirname, 'tiktok-cookies.txt');
 
+// Throttle yt-dlp info calls to avoid TikTok 403
+let lastInfoCall = 0;
+const INFO_MIN_INTERVAL = 3000; // 3s between calls
+
 const jobs = new Map();
 const activeProcesses = new Map();
 const CONCURRENT_LIMIT = 2;
@@ -84,7 +88,12 @@ router.get('/info', (req, res) => {
 
   const args = ['--dump-json', '--skip-download', '--no-playlist', '--no-warnings', '--no-check-certificates', '--cookies', cookiesPath, '--extractor-args', 'tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_version=34.1.2;manifest_app_version=341', '--', url];
 
-  const ytdlp = spawn('yt-dlp', args);
+  // Throttle: wait if last call was too recent
+  const now = Date.now();
+  const wait = Math.max(0, INFO_MIN_INTERVAL - (now - lastInfoCall));
+  setTimeout(() => {
+    lastInfoCall = Date.now();
+    const ytdlp = spawn('yt-dlp', args);
   let stdout = '', stderr = '';
   ytdlp.stdout.on('data', d => stdout += d.toString());
   ytdlp.stderr.on('data', d => stderr += d.toString());
@@ -126,6 +135,7 @@ router.get('/info', (req, res) => {
       res.status(500).json({ error: 'Failed to parse TikTok metadata.' });
     }
   });
+  }, wait);
 });
 
 function handleInfo(info, url, res) {
