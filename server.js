@@ -143,7 +143,7 @@ app.get('/api/info', rateLimiter, (req, res) => {
       '--dump-json',
       '--skip-download',
       '--no-playlist',
-      '--js-runtimes', 'deno:node',
+      '--js-runtimes', 'deno,node',
       '--remote-components', 'ejs:github'
     ];
 
@@ -284,7 +284,7 @@ function startJobDownload(job, useCookies = true) {
       '--audio-quality', bitrate,
       '--newline',
       '--no-playlist',
-      '--js-runtimes', 'deno:node',
+      '--js-runtimes', 'deno,node',
       '--remote-components', 'ejs:github'
     ];
   } else {
@@ -294,7 +294,7 @@ function startJobDownload(job, useCookies = true) {
       '--merge-output-format', 'mp4',
       '--newline',
       '--no-playlist',
-      '--js-runtimes', 'deno:node',
+      '--js-runtimes', 'deno,node',
       '--remote-components', 'ejs:github'
     ];
   }

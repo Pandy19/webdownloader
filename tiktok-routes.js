@@ -82,7 +82,7 @@ router.get('/info', (req, res) => {
     return res.json(cached.data);
   }
 
-  const args = ['--dump-json', '--skip-download', '--no-playlist', '--no-warnings', '--no-check-certificates', '--cookies', cookiesPath, '--', url];
+  const args = ['--dump-json', '--skip-download', '--no-playlist', '--no-warnings', '--no-check-certificates', '--cookies', cookiesPath, '--extractor-args', 'tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_version=34.1.2;manifest_app_version=341', '--', url];
 
   const ytdlp = spawn('yt-dlp', args);
   let stdout = '', stderr = '';
@@ -264,9 +264,9 @@ function processQueue() {
 function startDownload(job) {
   let args;
   if (job.format === 'mp3') {
-    args = ['-f', 'bestaudio', '--extract-audio', '--audio-format', 'mp3', '--audio-quality', '320K', '--newline', '--no-playlist', '--no-warnings', '--cookies', cookiesPath];
+    args = ['-f', 'bestaudio', '--extract-audio', '--audio-format', 'mp3', '--audio-quality', '320K', '--newline', '--no-playlist', '--no-warnings', '--cookies', cookiesPath, '--extractor-args', 'tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_version=34.1.2;manifest_app_version=341'];
   } else {
-    args = ['-f', 'bestvideo+bestaudio/best', '--merge-output-format', 'mp4', '--newline', '--no-playlist', '--no-warnings', '--cookies', cookiesPath];
+    args = ['-f', 'bestvideo+bestaudio/best', '--merge-output-format', 'mp4', '--newline', '--no-playlist', '--no-warnings', '--cookies', cookiesPath, '--extractor-args', 'tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_version=34.1.2;manifest_app_version=341'];
   }
   args.push('-o', path.join(downloadsDir, `${job.id}.%(ext)s`), '--', job.url);
 
