@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TK-Download - TikTok Video & Image Downloader</title>
+    <meta name="description" content="Download TikTok videos, photo slideshows, stories, and MP3 audio without watermark. Fast, free, and no registration required.">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#06b6d4">
+    <meta property="og:title" content="TK-Download - TikTok Video & Image Downloader">
+    <meta property="og:description" content="Download TikTok videos, photo slideshows, stories, and MP3 audio without watermark. Fast, free, and no registration required.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ytdownsave.online/tiktok.html">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="TK-Download - TikTok Downloader">
+    <meta name="twitter:description" content="Download TikTok videos, slideshows, stories & MP3 without watermark.">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="tiktok.css">
+    <!-- Monetag MultiTag Monetization -->
+    <script src="https://quge5.com/88/tag.min.js" data-zone="252747" async data-cfasync="false"></script>
+    <!-- Monetag Vignette Banner -->
+    <script>(function(s){s.dataset.zone='11196463',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+</head>
+<body>
+    <div class="glow-bg"></div>
+    <div class="container">
+        <header class="header">
+            <div class="logo"><i class="fa-solid fa-bolt"></i> TK-<span>Download</span></div>
+            <div class="header-right">
+                <a href="/index.html" class="btn-nav"><i class="fa-brands fa-youtube"></i> <span>YouTube</span></a>
+                <a href="#" class="btn-support" id="support-btn"><i class="fa-solid fa-heart"></i> <span>Support Us</span></a>
+                <div class="header-tag">Fast & Free</div>
+            </div>
+        </header>
+
+        <main class="main-card">
+            <h1 class="main-title">TikTok Downloader</h1>
+            <p class="main-subtitle">Download videos, slideshows, stories & MP3 without watermark.</p>
+
+            <div class="search-container">
+                <div class="input-wrapper">
+                    <i class="fa-brands fa-tiktok input-icon"></i>
+                    <input type="text" id="url-input" placeholder="Paste TikTok link here..." autocomplete="off">
+                    <button type="button" id="paste-btn" class="icon-btn" title="Paste"><i class="fa-regular fa-clipboard"></i></button>
+                </div>
+                <button type="button" id="fetch-btn" class="btn-primary">
+                    <span id="fetch-btn-text">Extract</span>
+                    <i class="fa-solid fa-arrow-right" id="fetch-btn-icon"></i>
+                    <div class="spinner hidden" id="fetch-spinner"></div>
+                </button>
+            </div>
+
+            <div class="error-banner hidden" id="error-banner"><i class="fa-solid fa-circle-exclamation"></i> <span id="error-text"></span></div>
+
+            <div class="skeleton hidden" id="skeleton"><div class="sk-thumb"></div><div class="sk-lines"><div class="sk-line"></div><div class="sk-line short"></div></div></div>
+
+            <!-- Result -->
+            <div class="result hidden" id="result">
+                <div class="result-top">
+                    <img id="r-thumb" src="" alt="Preview">
+                    <span class="badge" id="r-badge">Video</span>
+                </div>
+                <div class="result-info">
+                    <h3 id="r-title"></h3>
+                    <p class="r-author"><i class="fa-solid fa-user"></i> <span id="r-author"></span></p>
+                </div>
+                <!-- Actions -->
+                <div class="result-actions" id="video-actions">
+                    <button class="dl-btn" id="dl-video"><i class="fa-solid fa-video"></i> Download Video</button>
+                    <button class="dl-btn secondary" id="dl-mp3"><i class="fa-solid fa-music"></i> Download MP3</button>
+                </div>
+                <div class="result-actions hidden" id="slide-actions">
+                    <button class="dl-btn" id="dl-all-imgs"><i class="fa-solid fa-images"></i> Download All Images</button>
+                </div>
+                <div class="img-grid hidden" id="img-grid"></div>
+            </div>
+        </main>
+
+        <section class="features">
+            <div class="feat">
+                <div class="feat-icon cyan"><i class="fa-solid fa-video"></i></div>
+                <h4>Videos & Stories</h4>
+                <p>Download TikTok videos and stories in full HD quality without watermark.</p>
+            </div>
+            <div class="feat">
+                <div class="feat-icon purple"><i class="fa-solid fa-images"></i></div>
+                <h4>Photo Slideshows</h4>
+                <p>Save all images from TikTok photo slideshows individually in original quality.</p>
+            </div>
+            <div class="feat">
+                <div class="feat-icon pink"><i class="fa-solid fa-music"></i></div>
+                <h4>MP3 Audio</h4>
+                <p>Extract audio tracks from any TikTok video in high-quality 320kbps MP3 format.</p>
+            </div>
+        </section>
+
+        <footer class="footer">&copy; 2026 <a href="https://t.me/pandyshare" target="_blank">PandyShare</a>. All rights reserved. | <a href="#" class="footer-link" id="tos-link">Terms of Service</a> | <a href="#" class="footer-link" id="dmca-link">DMCA</a></footer>
+    </div>
+
+    <!-- Progress Modal -->
+    <div class="modal hidden" id="modal">
+        <div class="modal-box" id="modal-loading">
+            <div class="modal-head">
+                <h3 id="modal-title">Processing Video...</h3>
+                <button id="modal-x" class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="modal-sub" id="modal-sub"></p>
+            <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+            <div class="prog-stats"><span id="prog-pct">0%</span><span id="prog-speed">--</span></div>
+            <button class="btn-cancel" id="modal-cancel"><i class="fa-solid fa-ban"></i> Cancel Processing</button>
+        </div>
+        <div class="modal-box hidden" id="modal-success">
+            <div class="suc-icon"><i class="fa-solid fa-circle-check"></i></div>
+            <h3>Conversion Complete!</h3>
+            <p class="success-msg">Your file is fully processed and ready for download.</p>
+            <a href="#" id="save-btn" class="btn-save"><i class="fa-solid fa-file-arrow-down"></i> Save File to Device</a>
+            <a href="#" class="btn-coffee" id="modal-support-link"><i class="fa-solid fa-mug-hot"></i> Buy Me a Coffee ☕</a>
+            <button class="btn-text" id="suc-close">Close Window</button>
+        </div>
+        <div class="modal-box hidden" id="modal-failed">
+            <div class="fail-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+            <h3>Download Failed</h3>
+            <p class="fail-msg-text" id="fail-msg">Something went wrong during the conversion process.</p>
+            <button class="btn-save" id="fail-retry"><i class="fa-solid fa-rotate-right"></i> Try Again</button>
+            <button class="btn-text" id="fail-close">Close</button>
+        </div>
+    </div>
+
+    <!-- Support Modal -->
+    <div class="modal hidden" id="support-modal">
+        <div class="support-qr-container">
+            <button class="support-close-btn" id="sup-close"><i class="fa-solid fa-xmark"></i></button>
+            <img src="qr.png" alt="Donate" class="support-qr-img">
+        </div>
+    </div>
+
+    <!-- Legal Modal -->
+    <div class="modal hidden" id="legal-modal">
+        <div class="modal-box legal-card">
+            <div class="modal-head">
+                <h3 id="legal-title">Terms of Service</h3>
+                <button class="modal-close" id="legal-close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="legal-body" id="legal-content"></div>
+        </div>
+    </div>
+
+    <script src="tiktok.js"></script>
+</body>
+</html>

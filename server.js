@@ -14,6 +14,9 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, 'public')));
 
+// TikTok routes
+app.use('/api/tiktok', require('./tiktok-routes'));
+
 // Define downloads folder
 const downloadsDir = path.join(__dirname, 'downloads');
 if (!fs.existsSync(downloadsDir)) {
@@ -140,7 +143,8 @@ app.get('/api/info', rateLimiter, (req, res) => {
       '--dump-json',
       '--skip-download',
       '--no-playlist',
-      '--js-runtimes', 'node'
+      '--js-runtimes', 'deno:node',
+      '--remote-components', 'ejs:github'
     ];
 
     if (useCookies && hasCookies) {
@@ -280,7 +284,8 @@ function startJobDownload(job, useCookies = true) {
       '--audio-quality', bitrate,
       '--newline',
       '--no-playlist',
-      '--js-runtimes', 'node'
+      '--js-runtimes', 'deno:node',
+      '--remote-components', 'ejs:github'
     ];
   } else {
     const resLimit = quality || '1080';
@@ -289,7 +294,8 @@ function startJobDownload(job, useCookies = true) {
       '--merge-output-format', 'mp4',
       '--newline',
       '--no-playlist',
-      '--js-runtimes', 'node'
+      '--js-runtimes', 'deno:node',
+      '--remote-components', 'ejs:github'
     ];
   }
 
