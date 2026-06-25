@@ -18,9 +18,9 @@ try {
   });
 } catch {}
 
-// In-memory rate limiter: 10 requests per minute per IP
+// In-memory rate limiter: 10 requests per minute per IP (only for info/download)
 const rateLimitMap = new Map();
-router.use((req, res, next) => {
+function tiktokRateLimiter(req, res, next) {
   const ip = req.ip;
   const now = Date.now();
   const entry = rateLimitMap.get(ip) || [];
@@ -29,7 +29,7 @@ router.use((req, res, next) => {
   recent.push(now);
   rateLimitMap.set(ip, recent);
   next();
-});
+}
 // Clean up rate limit entries periodically
 setInterval(() => {
   const now = Date.now();
@@ -76,7 +76,7 @@ setInterval(() => {
 router.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
 
 // GET /info - auto-detect content type
-router.get('/info', (req, res) => {
+router.get('/info', tiktokRateLimiter, (req, res) => {
   const originalUrl = req.query.url;
   if (!originalUrl) return res.status(400).json({ error: 'TikTok URL is required' });
 
@@ -204,7 +204,7 @@ function handleInfo(info, url, res) {
 }
 
 // POST /download - start job (video, story, or mp3)
-router.post('/download', (req, res) => {
+router.post('/download', tiktokRateLimiter, (req, res) => {
   let { url, title, format } = req.body;
   if (!url) return res.status(400).json({ error: 'URL is required' });
 
