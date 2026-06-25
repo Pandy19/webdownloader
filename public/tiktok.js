@@ -59,7 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const r = await fetch(`/api/tiktok/info?url=${encodeURIComponent(url)}`);
-      const d = await r.json();
+      let d;
+      try { d = await r.json(); } catch { throw new Error('Our server is currently handling other downloads. Please try again in a moment.'); }
       if (!r.ok) throw new Error(d.error);
       info = d;
       rThumb.src = d.thumbnail || '';
@@ -115,7 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const r = await fetch('/api/tiktok/download', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: urlInput.value.trim(), title: info.title, format }) });
-      const d = await r.json();
+      let d;
+      try { d = await r.json(); } catch { throw new Error('Our server is currently handling other downloads. Please try again in a moment.'); }
       if (!r.ok) throw new Error(d.error);
       jobId = d.jobId;
       startPoll();
@@ -128,7 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const r = await fetch(`/api/tiktok/status/${jobId}`);
         if (r.status === 404) throw new Error('Job expired.');
-        const d = await r.json();
+        let d;
+        try { d = await r.json(); } catch { console.warn('Status poll: parse failed, retrying...'); return; }
         if (d.status === 'queued') { modalTitle.textContent = 'Queued...'; progPct.textContent = d.queuePosition ? `#${d.queuePosition}` : '...'; }
         else if (d.status === 'downloading') { modalTitle.textContent = 'Downloading...'; progFill.style.width = d.percent + '%'; progPct.textContent = Math.round(d.percent) + '%'; progSpeed.textContent = d.speed || '--'; }
         else if (d.status === 'processing') { progFill.style.width = '95%'; progPct.textContent = '95%'; modalTitle.textContent = 'Processing...'; }

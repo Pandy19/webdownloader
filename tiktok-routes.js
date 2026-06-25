@@ -46,8 +46,13 @@ const INFO_MIN_INTERVAL = 3000; // 3s between calls
 
 const jobs = new Map();
 const activeProcesses = new Map();
-const CONCURRENT_LIMIT = 2;
+const CONCURRENT_LIMIT = 1;
+const MAX_QUEUE_SIZE = 3;
 let runningCount = 0;
+
+function getMemoryUsageMB() {
+  return process.memoryUsage.rss ? process.memoryUsage.rss() / (1024 * 1024) : process.memoryUsage().rss / (1024 * 1024);
+}
 
 const progressRegex = /\[download\]\s+(\d+\.?\d*)%\s+of\s+(?:~)?(\d+\.?\d*\w+)\s+at\s+(\d+\.?\d*\w+\/s)\s+ETA\s+(\d+:\d+(?::\d+)?)/;
 
@@ -74,6 +79,12 @@ router.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.upt
 router.get('/info', (req, res) => {
   const originalUrl = req.query.url;
   if (!originalUrl) return res.status(400).json({ error: 'TikTok URL is required' });
+
+  // Block if a download is actively running and memory is high
+  const hasActiveDownload = [...jobs.values()].some(j => ['downloading', 'processing'].includes(j.status));
+  if (hasActiveDownload && getMemoryUsageMB() > 300) {
+    return res.status(503).json({ error: 'Our server is currently handling other downloads. Please try again in a moment.' });
+  }
 
   // Normalize /photo/ URLs to /video/ (yt-dlp doesn't support /photo/ path)
   let url = originalUrl.replace(/\/photo\//, '/video/');
@@ -197,6 +208,16 @@ router.post('/download', (req, res) => {
   let { url, title, format } = req.body;
   if (!url) return res.status(400).json({ error: 'URL is required' });
 
+  // Memory guard
+  if (getMemoryUsageMB() > 400) {
+    return res.status(503).json({ error: 'Our server is currently handling other downloads. Please try again in a moment.' });
+  }
+  // Queue size guard
+  const queuedCount = [...jobs.values()].filter(j => j.status === 'queued').length;
+  if (queuedCount >= MAX_QUEUE_SIZE) {
+    return res.status(503).json({ error: 'Our server is currently handling other downloads. Please try again in a moment.' });
+  }
+
   // Normalize /photo/ URLs to /video/
   url = url.replace(/\/photo\//, '/video/');
   url = url.split('?')[0];
@@ -273,9 +294,9 @@ function processQueue() {
 function startDownload(job) {
   let args;
   if (job.format === 'mp3') {
-    args = ['-f', 'bestaudio', '--extract-audio', '--audio-format', 'mp3', '--audio-quality', '320K', '--newline', '--no-playlist', '--no-warnings', '--cookies', cookiesPath, '--extractor-args', 'tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_version=34.1.2;manifest_app_version=341'];
+    args = ['-f', 'bestaudio', '--extract-audio', '--audio-format', 'mp3', '--audio-quality', '320K', '--newline', '--no-playlist', '--no-warnings', '--buffer-size', '16K', '--http-chunk-size', '10M', '--cookies', cookiesPath, '--extractor-args', 'tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_version=34.1.2;manifest_app_version=341'];
   } else {
-    args = ['-f', 'bestvideo+bestaudio/best', '--merge-output-format', 'mp4', '--newline', '--no-playlist', '--no-warnings', '--cookies', cookiesPath, '--extractor-args', 'tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_version=34.1.2;manifest_app_version=341'];
+    args = ['-f', 'bestvideo+bestaudio/best', '--merge-output-format', 'mp4', '--newline', '--no-playlist', '--no-warnings', '--buffer-size', '16K', '--http-chunk-size', '10M', '--cookies', cookiesPath, '--extractor-args', 'tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_version=34.1.2;manifest_app_version=341'];
   }
   args.push('-o', path.join(downloadsDir, `${job.id}.%(ext)s`), '--', job.url);
 
