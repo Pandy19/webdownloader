@@ -293,11 +293,16 @@ function processQueue() {
 
 function startDownload(job) {
   let args;
+  const useCookies = !job._retried; // Skip cookies on retry
   if (job.format === 'mp3') {
-    args = ['-f', 'bestaudio', '--extract-audio', '--audio-format', 'mp3', '--audio-quality', '320K', '--newline', '--no-playlist', '--no-warnings', '--buffer-size', '16K', '--http-chunk-size', '10M', '--cookies', cookiesPath, '--extractor-args', 'tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_version=34.1.2;manifest_app_version=341'];
+    args = ['-f', 'bestaudio', '--extract-audio', '--audio-format', 'mp3', '--audio-quality', '320K', '--newline', '--no-playlist', '--no-warnings', '--buffer-size', '16K', '--http-chunk-size', '10M'];
   } else {
-    args = ['-f', 'bestvideo+bestaudio/best', '--merge-output-format', 'mp4', '--newline', '--no-playlist', '--no-warnings', '--buffer-size', '16K', '--http-chunk-size', '10M', '--cookies', cookiesPath, '--extractor-args', 'tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_version=34.1.2;manifest_app_version=341'];
+    args = ['-f', 'bestvideo+bestaudio/best', '--merge-output-format', 'mp4', '--newline', '--no-playlist', '--no-warnings', '--buffer-size', '16K', '--http-chunk-size', '10M'];
   }
+  if (useCookies && fs.existsSync(cookiesPath)) {
+    args.push('--cookies', cookiesPath);
+  }
+  args.push('--extractor-args', 'tiktok:api_hostname=api16-normal-c-useast1a.tiktokv.com;app_version=34.1.2;manifest_app_version=341');
   args.push('-o', path.join(downloadsDir, `${job.id}.%(ext)s`), '--', job.url);
 
   const ytdlp = spawn('yt-dlp', args);
@@ -325,16 +330,16 @@ function startDownload(job) {
       if (found) { job.filePath = path.join(downloadsDir, found); job.ext = path.extname(found).substring(1); job.status = 'completed'; job.percent = 100; }
       else { job.status = 'failed'; job.error = 'File not found after download.'; }
     } else {
-      // Retry once on 403 errors (TikTok rate limiting)
+      // Retry once on 403 errors (TikTok rate limiting) - without cookies
       if (!job._retried && /403|Forbidden/i.test(stderr)) {
         job._retried = true;
+        job.percent = 0;
         job.status = 'processing';
-        job.title_status = 'Retrying download...';
         setTimeout(() => {
           runningCount++;
           job.status = 'downloading';
           startDownload(job);
-        }, 5000);
+        }, 3000);
         processQueue();
         return;
       }
