@@ -71,7 +71,7 @@ function rateLimiter(req, res, next) {
   const timestamps = ipCache.get(ip).filter(t => now - t < RATE_LIMIT_WINDOW);
   if (timestamps.length >= RATE_LIMIT_MAX) {
     console.warn(`🛑 Rate limiter blocked IP: ${ip} (reached limit of ${RATE_LIMIT_MAX} reqs/min)`);
-    return res.status(429).json({ error: 'Too many requests from this IP. Please wait a minute.' });
+    return res.status(429).json({ error: 'Our server is currently handling other downloads. Please try again in a moment.' });
   }
   timestamps.push(now);
   ipCache.set(ip, timestamps);

@@ -25,7 +25,7 @@ router.use((req, res, next) => {
   const now = Date.now();
   const entry = rateLimitMap.get(ip) || [];
   const recent = entry.filter(t => now - t < 60000);
-  if (recent.length >= 10) return res.status(429).json({ error: 'Rate limit exceeded. Try again in a minute.' });
+  if (recent.length >= 10) return res.status(429).json({ error: 'Our server is currently handling other downloads. Please try again in a moment.' });
   recent.push(now);
   rateLimitMap.set(ip, recent);
   next();
@@ -325,9 +325,24 @@ function startDownload(job) {
       if (found) { job.filePath = path.join(downloadsDir, found); job.ext = path.extname(found).substring(1); job.status = 'completed'; job.percent = 100; }
       else { job.status = 'failed'; job.error = 'File not found after download.'; }
     } else {
+      // Retry once on 403 errors (TikTok rate limiting)
+      if (!job._retried && /403|Forbidden/i.test(stderr)) {
+        job._retried = true;
+        job.status = 'processing';
+        job.title_status = 'Retrying download...';
+        setTimeout(() => {
+          runningCount++;
+          job.status = 'downloading';
+          startDownload(job);
+        }, 5000);
+        processQueue();
+        return;
+      }
       job.status = 'failed';
       const errLines = stderr.split('\n').filter(l => /error|fail/i.test(l));
-      job.error = errLines.join('\n') || `Exit code ${code}`;
+      const rawErr = errLines.join('\n') || `Exit code ${code}`;
+      // Show user-friendly message for 403
+      job.error = /403|Forbidden/i.test(rawErr) ? 'TikTok is temporarily blocking requests. Please try again in a moment.' : rawErr;
     }
     processQueue();
   });
