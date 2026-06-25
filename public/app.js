@@ -246,7 +246,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const response = await fetch(`/api/info?url=${encodeURIComponent(url)}`);
-            const data = await response.json();
+            
+            let data;
+            try {
+                data = await response.json();
+            } catch (parseErr) {
+                throw new Error('Our server is currently handling other downloads. Please try again in a moment.');
+            }
 
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to fetch details');
@@ -367,7 +373,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ url, type, quality, title })
             });
 
-            const data = await response.json();
+            let data;
+            try {
+                data = await response.json();
+            } catch (parseErr) {
+                throw new Error('Our server is currently handling other downloads. Please try again in a moment.');
+            }
 
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to initialize download job');
@@ -394,7 +405,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error('Download job expired or not found.');
                 }
                 
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseErr) {
+                    // Server may have restarted due to overload - don't kill polling yet, retry
+                    console.warn('Status poll: failed to parse response, retrying...');
+                    return;
+                }
 
                 if (data.error) {
                     throw new Error(data.error);

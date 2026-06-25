@@ -83,8 +83,15 @@ const jobs = new Map();
 const activeProcesses = new Map(); // jobId -> Spawned process
 
 // Queue management variables
-const CONCURRENT_LIMIT = 2; // Limit parallel yt-dlp & ffmpeg processes to protect CPU
+const CONCURRENT_LIMIT = 1; // Only 1 yt-dlp process at a time to stay under 512MB RAM on Render
+const MAX_QUEUE_SIZE = 3; // Reject new jobs if queue is too long
 let runningCount = 0;
+
+// Memory guard: reject work if memory usage is dangerously high
+function getMemoryUsageMB() {
+  return process.memoryUsage.rss ? process.memoryUsage.rss() / (1024 * 1024) : process.memoryUsage().rss / (1024 * 1024);
+}
+const MEMORY_THRESHOLD_MB = 400; // Reject new downloads if RSS exceeds this
 
 // Regex to parse yt-dlp progress output
 const progressRegex = /\[download\]\s+(\d+\.?\d*)%\s+of\s+(?:~)?(\d+\.?\d*\w+)\s+at\s+(\d+\.?\d*\w+\/s)\s+ETA\s+(\d+:\d+(?::\d+)?)/;
@@ -284,6 +291,8 @@ function startJobDownload(job, useCookies = true) {
       '--audio-quality', bitrate,
       '--newline',
       '--no-playlist',
+      '--buffer-size', '16K',
+      '--http-chunk-size', '10M',
       '--js-runtimes', 'deno,node',
       '--remote-components', 'ejs:github'
     ];
@@ -294,6 +303,8 @@ function startJobDownload(job, useCookies = true) {
       '--merge-output-format', 'mp4',
       '--newline',
       '--no-playlist',
+      '--buffer-size', '16K',
+      '--http-chunk-size', '10M',
       '--js-runtimes', 'deno,node',
       '--remote-components', 'ejs:github'
     ];
@@ -398,6 +409,19 @@ app.post('/api/download', rateLimiter, (req, res) => {
   }
   if (!type || !['video', 'audio'].includes(type)) {
     return res.status(400).json({ error: 'Invalid type' });
+  }
+
+  // Memory guard: reject if server is near OOM
+  const currentMem = getMemoryUsageMB();
+  if (currentMem > MEMORY_THRESHOLD_MB) {
+    console.warn(`⚠️ Memory guard: rejecting download (RSS: ${Math.round(currentMem)}MB)`);
+    return res.status(503).json({ error: 'Our server is currently processing other downloads. Please try again in a moment.' });
+  }
+
+  // Queue size guard
+  const queuedCount = [...jobs.values()].filter(j => j.status === 'queued').length;
+  if (queuedCount >= MAX_QUEUE_SIZE) {
+    return res.status(503).json({ error: 'Our server is currently processing other downloads. Please try again in a moment.' });
   }
 
   const jobId = crypto.randomBytes(8).toString('hex');
