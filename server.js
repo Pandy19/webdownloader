@@ -142,6 +142,12 @@ app.get('/api/info', rateLimiter, (req, res) => {
     return res.status(400).json({ error: 'YouTube URL is required' });
   }
 
+  // If a download is actively running, reject new info requests to protect memory
+  const hasActiveDownload = [...jobs.values()].some(j => ['downloading', 'processing'].includes(j.status));
+  if (hasActiveDownload && getMemoryUsageMB() > 300) {
+    return res.status(503).json({ error: 'Our server is currently handling other downloads. Please try again in a moment.' });
+  }
+
   const cookiesPath = path.join(__dirname, 'cookies.txt');
   const hasCookies = fs.existsSync(cookiesPath);
 
