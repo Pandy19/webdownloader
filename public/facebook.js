@@ -13,12 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const rBadge = document.getElementById('r-badge');
   const rTitle = document.getElementById('r-title');
   const rAuthor = document.getElementById('r-author');
-  const videoActions = document.getElementById('video-actions');
-  const slideActions = document.getElementById('slide-actions');
-  const imgGrid = document.getElementById('img-grid');
   const dlVideo = document.getElementById('dl-video');
   const dlMp3 = document.getElementById('dl-mp3');
-  const dlAllImgs = document.getElementById('dl-all-imgs');
   const modal = document.getElementById('modal');
   const modalLoading = document.getElementById('modal-loading');
   const modalSuccess = document.getElementById('modal-success');
@@ -36,7 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let info = null, jobId = null, poll = null, lastUrl = '';
 
-  function isValid(url) { return /^(https?:\/\/)?(www\.|vm\.|vt\.)?tiktok\.com\/.+/i.test(url.trim()); }
+  function isValid(url) {
+    return /^(https?:\/\/)?(www\.|m\.|web\.)?(facebook\.com|fb\.watch|fb\.com)\/.+/i.test(url.trim());
+  }
 
   // Auto-fetch
   let debounce = null;
@@ -54,57 +52,25 @@ document.addEventListener('DOMContentLoaded', () => {
   // Fetch info
   fetchBtn.addEventListener('click', async () => {
     const url = urlInput.value.trim();
-    if (!url) return showErr('Paste a TikTok link first.');
-    if (!isValid(url)) return showErr('Invalid TikTok URL.');
+    if (!url) return showErr('Paste a Facebook video link first.');
+    if (!isValid(url)) return showErr('Invalid Facebook URL.');
 
     hideErr(); result.classList.add('hidden'); skeleton.classList.remove('hidden');
     fetchBtn.disabled = true; fetchBtnText.textContent = 'Fetching...'; fetchBtnIcon.classList.add('hidden'); fetchSpinner.classList.remove('hidden');
 
     try {
-      const r = await fetch(`/api/tiktok/info?url=${encodeURIComponent(url)}`);
+      const r = await fetch(`/api/facebook/info?url=${encodeURIComponent(url)}`);
       let d;
       try { d = await r.json(); } catch { throw new Error('Our server is currently handling other downloads. Please try again in a moment.'); }
       if (!r.ok) throw new Error(d.error);
       info = d;
       rThumb.src = d.thumbnail || '';
-      rTitle.textContent = d.title || 'TikTok';
+      rTitle.textContent = d.title || 'Facebook Video';
       rAuthor.textContent = d.author || 'Unknown';
-      rBadge.textContent = d.type === 'slideshow' ? 'Slideshow' : d.type === 'story' ? 'Story' : 'Video';
-
-      if (d.type === 'slideshow' && d.images && d.images.length) {
-        videoActions.classList.add('hidden'); slideActions.classList.remove('hidden'); imgGrid.classList.remove('hidden');
-        renderImages(d.images);
-      } else {
-        slideActions.classList.add('hidden'); imgGrid.classList.add('hidden'); videoActions.classList.remove('hidden');
-      }
+      rBadge.textContent = 'Video';
       skeleton.classList.add('hidden'); result.classList.remove('hidden'); lastUrl = url;
     } catch (e) { showErr(e.message); skeleton.classList.add('hidden'); }
     finally { fetchBtn.disabled = false; fetchBtnText.textContent = 'Extract'; fetchBtnIcon.classList.remove('hidden'); fetchSpinner.classList.add('hidden'); }
-  });
-
-  function renderImages(imgs) {
-    imgGrid.innerHTML = '';
-    imgs.forEach((url, i) => {
-      const div = document.createElement('div'); div.className = 'img-item';
-      div.innerHTML = `<img src="${url}" loading="lazy"><button data-url="${url}" data-i="${i+1}"><i class="fa-solid fa-download"></i></button>`;
-      imgGrid.appendChild(div);
-    });
-    imgGrid.querySelectorAll('button').forEach(b => b.addEventListener('click', () => dlImage(b.dataset.url, b.dataset.i)));
-  }
-
-  async function dlImage(url, i) {
-    try { const r = await fetch(url); const b = await r.blob(); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `tiktok_${i}.jpg`; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
-    catch { window.open(url, '_blank'); }
-  }
-
-  dlAllImgs.addEventListener('click', async () => {
-    if (!info || !info.images || dlAllImgs.disabled) return;
-    dlAllImgs.disabled = true;
-    const orig = dlAllImgs.innerHTML;
-    dlAllImgs.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Downloading...';
-    for (let i = 0; i < info.images.length; i++) { await dlImage(info.images[i], i + 1); if (i < info.images.length - 1) await new Promise(r => setTimeout(r, 400)); }
-    dlAllImgs.innerHTML = orig;
-    dlAllImgs.disabled = false;
   });
 
   dlVideo.addEventListener('click', () => startJob('video'));
@@ -119,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     progSize.textContent = 'Unknown'; progEta.textContent = '00:00'; progPhase.textContent = 'Initializing...';
 
     try {
-      const r = await fetch('/api/tiktok/download', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: urlInput.value.trim(), title: info.title, format }) });
+      const r = await fetch('/api/facebook/download', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: urlInput.value.trim(), title: info.title, format }) });
       let d;
       try { d = await r.json(); } catch { throw new Error('Our server is currently handling other downloads. Please try again in a moment.'); }
       if (!r.ok) throw new Error(d.error);
@@ -132,14 +98,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (poll) clearInterval(poll);
     poll = setInterval(async () => {
       try {
-        const r = await fetch(`/api/tiktok/status/${jobId}`);
+        const r = await fetch(`/api/facebook/status/${jobId}`);
         if (r.status === 404) throw new Error('Job expired.');
         let d;
-        try { d = await r.json(); } catch { console.warn('Status poll: parse failed, retrying...'); return; }
+        try { d = await r.json(); } catch { return; }
         if (d.status === 'queued') { modalTitle.textContent = 'Queued...'; progPct.textContent = d.queuePosition ? `#${d.queuePosition}` : '...'; progPhase.textContent = 'Waiting in queue...'; }
         else if (d.status === 'downloading') { modalTitle.textContent = 'Downloading...'; progFill.style.width = d.percent + '%'; progPct.textContent = Math.round(d.percent) + '%'; progSpeed.textContent = d.speed || '--'; progSize.textContent = d.size || 'Unknown'; progEta.textContent = d.eta || '00:00'; progPhase.textContent = 'Downloading media streams...'; }
         else if (d.status === 'processing') { progFill.style.width = '95%'; progPct.textContent = '95%'; modalTitle.textContent = 'Processing...'; progPhase.textContent = 'Merging streams...'; }
-        else if (d.status === 'completed') { stopPoll(); showModal('success'); saveBtn.href = `/api/tiktok/retrieve/${jobId}`; jobId = null; }
+        else if (d.status === 'completed') { stopPoll(); showModal('success'); saveBtn.href = `/api/facebook/retrieve/${jobId}`; jobId = null; }
         else if (d.status === 'failed') { throw new Error(d.error || 'Failed'); }
       } catch (e) { stopPoll(); showModal('failed'); failMsg.textContent = e.message; }
     }, 800);
@@ -150,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function cancelJob() {
     if (!jobId) return;
     const id = jobId; stopPoll(); modal.classList.add('hidden'); jobId = null;
-    try { await fetch(`/api/tiktok/cancel/${id}`, { method: 'POST' }); } catch {}
+    try { await fetch(`/api/facebook/cancel/${id}`, { method: 'POST' }); } catch {}
   }
 
   function showModal(state) {
@@ -168,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('suc-close').addEventListener('click', () => modal.classList.add('hidden'));
   document.getElementById('save-btn').addEventListener('click', () => setTimeout(() => modal.classList.add('hidden'), 1500));
   document.getElementById('fail-close').addEventListener('click', () => { modal.classList.add('hidden'); jobId = null; });
-  document.getElementById('fail-retry').addEventListener('click', () => startJob(info && info.type === 'slideshow' ? 'video' : 'video'));
+  document.getElementById('fail-retry').addEventListener('click', () => { if (info) startJob('video'); });
   modal.addEventListener('click', e => { if (e.target === modal) cancelJob(); });
 
   // Support
@@ -181,8 +147,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Legal modals
   const legalTexts = {
-    tos: `<h4>1. Acceptance of Terms</h4><p>By using the TK-Download website ("Service"), you agree to abide by these Terms of Service. If you do not agree with any part of these terms, please do not use the Service.</p><h4>2. Permitted Use</h4><p>This Service is intended solely for personal, non-commercial, and educational purposes. You represent that you have the legal right or permission from the copyright owner to download any content using this tool.</p><h4>3. Intellectual Property Rights</h4><p>We respect the intellectual property of others. You must not download copyrighted material unless you own it or have explicit written permission. Users assume all liabilities for any copyright infringement resulting from misuse of this tool.</p><h4>4. Disclaimer of Warranties</h4><p>The Service is provided "as is" and "as available". We make no warranties, express or implied, regarding the reliability, uptime, speed, or accuracy of the service.</p><h4>5. Limitation of Liability</h4><p>In no event shall the operators of TK-Download or PandyShare be liable for any damages, direct or indirect, arising out of the use of, or inability to use, this website.</p>`,
-    dmca: `<h4>DMCA Takedown & Abuse Policy</h4><p>TK-Download operates as a transient download utility. When you request a download, the server fetches the data streams directly from official sources, processes them, and transmits the resulting file to your browser.</p><h4>Important: We do not host content</h4><p>Files are generated on-the-fly and deleted from our servers immediately after the client download finishes (or after a 30-minute expiration timeout). <strong>There is no database, catalog, or permanent repository of uploaded files</strong> on this server.</p><h4>Reporting Abuse or Security Violations</h4><p>If you believe this tool is being used to bypass specific security architectures, or if you have questions regarding intellectual property rights, please contact us directly:</p><ul><li>Telegram: <a href="https://t.me/pandyshare" target="_blank" style="color:var(--cyan);">t.me/pandyshare</a></li></ul><p>We will review your inquiry within 48 hours.</p>`
+    tos: `<h4>1. Acceptance of Terms</h4><p>By using the FB-Download website ("Service"), you agree to abide by these Terms of Service.</p><h4>2. Permitted Use</h4><p>This Service is intended solely for personal, non-commercial, and educational purposes. You represent that you have the legal right or permission from the copyright owner to download any content using this tool.</p><h4>3. Intellectual Property Rights</h4><p>We respect the intellectual property of others. You must not download copyrighted material unless you own it or have explicit written permission.</p><h4>4. Disclaimer of Warranties</h4><p>The Service is provided "as is" and "as available". We make no warranties regarding the reliability, uptime, speed, or accuracy of the service.</p><h4>5. Limitation of Liability</h4><p>In no event shall the operators of FB-Download or PandyShare be liable for any damages arising out of the use of this website.</p>`,
+    dmca: `<h4>DMCA Takedown & Abuse Policy</h4><p>FB-Download operates as a transient download utility. Files are generated on-the-fly and deleted immediately after download.</p><h4>Important: We do not host content</h4><p><strong>There is no database or permanent repository of files</strong> on this server.</p><h4>Reporting Abuse</h4><p>Contact us:</p><ul><li>Telegram: <a href="https://t.me/pandyshare" target="_blank" style="color:var(--cyan);">t.me/pandyshare</a></li></ul><p>We will review your inquiry within 48 hours.</p>`
   };
   const legalModal = document.getElementById('legal-modal');
   const legalTitle = document.getElementById('legal-title');
@@ -192,8 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('legal-close').addEventListener('click', () => legalModal.classList.add('hidden'));
   legalModal.addEventListener('click', e => { if (e.target === legalModal) legalModal.classList.add('hidden'); });
 
-  window.addEventListener('beforeunload', () => { if (jobId) navigator.sendBeacon(`/api/tiktok/cancel/${jobId}`); });
+  window.addEventListener('beforeunload', () => { if (jobId) navigator.sendBeacon(`/api/facebook/cancel/${jobId}`); });
 
-  // Register service worker
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 });

@@ -82,7 +82,7 @@ router.get('/info', tiktokRateLimiter, (req, res) => {
 
   // Block if a download is actively running and memory is high
   const hasActiveDownload = [...jobs.values()].some(j => ['downloading', 'processing'].includes(j.status));
-  if (hasActiveDownload && getMemoryUsageMB() > 300) {
+  if (hasActiveDownload && getMemoryUsageMB() > 400) {
     return res.status(503).json({ error: 'Our server is currently handling other downloads. Please try again in a moment.' });
   }
 

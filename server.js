@@ -17,6 +17,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 // TikTok routes
 app.use('/api/tiktok', require('./tiktok-routes'));
 
+// Facebook routes
+app.use('/api/facebook', require('./facebook-routes'));
+
+// Twitter routes
+app.use('/api/twitter', require('./twitter-routes'));
+
 // Define downloads folder
 const downloadsDir = path.join(__dirname, 'downloads');
 if (!fs.existsSync(downloadsDir)) {
@@ -144,7 +150,7 @@ app.get('/api/info', rateLimiter, (req, res) => {
 
   // If a download is actively running, reject new info requests to protect memory
   const hasActiveDownload = [...jobs.values()].some(j => ['downloading', 'processing'].includes(j.status));
-  if (hasActiveDownload && getMemoryUsageMB() > 300) {
+  if (hasActiveDownload && getMemoryUsageMB() > 400) {
     return res.status(503).json({ error: 'Our server is currently handling other downloads. Please try again in a moment.' });
   }
 
